@@ -545,6 +545,24 @@
                 <p>Configure everything yourself • Full control</p>
                 <div class="profile-stats">Your preferences • Your way</div>
             </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button onclick="openShop()" style="flex: 1; background: linear-gradient(45deg, #f093fb, #f5576c);">
+                    🛍️ Shop
+                </button>
+                <button onclick="openPremium()" style="flex: 1; background: linear-gradient(45deg, #FFD700, #FFA500);">
+                    👑 Premium
+                </button>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center; padding: 15px; background: rgba(0, 242, 254, 0.1); border-radius: 10px; border: 2px solid #00f2fe;">
+                <div style="font-size: 1.5em; font-weight: bold; color: #FFD700;">
+                    💰 <span id="coin-display">0</span> Aki Coins
+                </div>
+                <div style="font-size: 0.9em; color: #b0c4de; margin-top: 5px;">
+                    Earn coins by playing • Buy cosmetics in shop
+                </div>
+            </div>
         </div>
     </div>
 
@@ -617,7 +635,7 @@
 
             <p class="info-text">
                 💡 Your Fortnite sensitivity will be converted to match the same feel!<br>
-                🖱️ <strong>Mouse:</strong> RIGHT-CLICK + DRAG to look | LEFT-CLICK to shoot<br>
+                🖱️ <strong>Mouse:</strong> Move mouse to aim (360°) | Click to shoot<br>
                 🎮 <strong>Controller:</strong> Right stick to aim | RT to shoot<br>
                 🌐 Full 3D environment with advanced controller settings!
             </p>
@@ -625,6 +643,61 @@
             <button onclick="startMode('tracking')">🔄 Tracking Mode (60s)</button>
             <button onclick="startMode('precision')" class="mode-btn">🎯 Precision Mode (60s)</button>
             <button onclick="startMode('speed')" class="mode-btn">⚡ Speed Mode (60s)</button>
+        </div>
+    </div>
+
+    <div id="shop-screen" style="display: none;">
+        <div class="menu-card" style="max-width: 700px;">
+            <h1>🛍️ Cosmetics Shop</h1>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="font-size: 1.5em; color: #FFD700;">💰 <span id="shop-coins">0</span> Coins</span>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <button onclick="showShopCategory('crosshairs')" class="filter-btn active" id="shop-tab-crosshairs">Crosshairs</button>
+                <button onclick="showShopCategory('targetSkins')" class="filter-btn" id="shop-tab-targetSkins">Target Skins</button>
+                <button onclick="showShopCategory('environments')" class="filter-btn" id="shop-tab-environments">Environments</button>
+            </div>
+
+            <div id="shop-content"></div>
+
+            <button onclick="closeShop()" style="margin-top: 20px;">Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="premium-screen" style="display: none;">
+        <div class="menu-card">
+            <h1>👑 Premium</h1>
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="font-size: 3em;">💎</div>
+                <h2 style="color: #FFD700;">Unlock Everything!</h2>
+            </div>
+
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border: 2px solid #FFD700;">
+                <h3 style="color: #FFD700; margin-bottom: 15px;">Premium Features:</h3>
+                <div style="margin: 10px 0;">✅ All crosshairs unlocked</div>
+                <div style="margin: 10px 0;">✅ All target skins unlocked</div>
+                <div style="margin: 10px 0;">✅ All environments unlocked</div>
+                <div style="margin: 10px 0;">✅ Exclusive premium-only cosmetics</div>
+                <div style="margin: 10px 0;">✅ 2x coin earning rate</div>
+                <div style="margin: 10px 0;">✅ Advanced stats tracking</div>
+                <div style="margin: 10px 0;">✅ Priority support</div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <div style="font-size: 2.5em; font-weight: bold; color: #FFD700; margin-bottom: 10px;">
+                    $4.99
+                </div>
+                <div style="color: #b0c4de; margin-bottom: 20px;">One-time payment • Lifetime access</div>
+                <button onclick="purchasePremium()" style="font-size: 1.3em; padding: 20px 40px; background: linear-gradient(45deg, #FFD700, #FFA500);">
+                    👑 Get Premium Now
+                </button>
+                <div style="margin-top: 15px; font-size: 0.85em; color: #b0c4de;">
+                    Join our Discord • Open a ticket • Get Premium! 🎮
+                </div>
+            </div>
+
+            <button onclick="closePremium()">Maybe Later</button>
         </div>
     </div>
 
@@ -657,6 +730,9 @@
             <div class="stat">Hits: <span class="highlight" id="final-hits">0</span></div>
             <div class="stat">Misses: <span class="highlight" id="final-misses">0</span></div>
             <div class="stat">Best Streak: <span class="highlight" id="final-streak">0</span></div>
+            <div class="stat" style="margin-top: 20px; font-size: 1.5em; color: #FFD700;">
+                💰 +<span id="coins-earned">0</span> Coins Earned!
+            </div>
             <button onclick="backToMenu()">Back to Menu</button>
             <button onclick="restartMode()" class="mode-btn">Play Again</button>
         </div>
@@ -671,6 +747,79 @@
             miss: null,
             streak: null
         };
+
+        // Player progression and cosmetics
+        let playerData = {
+            coins: 0,
+            isPremium: false,
+            unlockedCrosshairs: ['default'],
+            unlockedTargetSkins: ['default'],
+            unlockedEnvironments: ['default'],
+            selectedCrosshair: 'default',
+            selectedTargetSkin: 'default',
+            selectedEnvironment: 'default',
+            totalGamesPlayed: 0,
+            lifetimeScore: 0
+        };
+
+        // Shop items
+        const shopItems = {
+            crosshairs: [
+                { id: 'default', name: 'Classic', price: 0, color: '#00f2fe' },
+                { id: 'dot', name: 'Precision Dot', price: 50, color: '#ff4757' },
+                { id: 'circle', name: 'Circle', price: 75, color: '#FFD700' },
+                { id: 'cross', name: 'Cross', price: 100, color: '#00ff00' },
+                { id: 'premium1', name: 'Neon Glow', price: 'PREMIUM', color: '#ff00ff' },
+                { id: 'premium2', name: 'Rainbow', price: 'PREMIUM', color: 'rainbow' }
+            ],
+            targetSkins: [
+                { id: 'default', name: 'Classic Red', price: 0, colors: { main: 0xff4757, inner: 0xffffff } },
+                { id: 'gold', name: 'Golden', price: 100, colors: { main: 0xFFD700, inner: 0xffffff } },
+                { id: 'neon', name: 'Neon Blue', price: 150, colors: { main: 0x00f2fe, inner: 0x4facfe } },
+                { id: 'toxic', name: 'Toxic Green', price: 200, colors: { main: 0x00ff00, inner: 0x00aa00 } },
+                { id: 'premium1', name: 'Diamond', price: 'PREMIUM', colors: { main: 0xb9f2ff, inner: 0xffffff } },
+                { id: 'premium2', name: 'Fire', price: 'PREMIUM', colors: { main: 0xff6b00, inner: 0xffaa00 } }
+            ],
+            environments: [
+                { id: 'default', name: 'Space Blue', price: 0, color: 0x0a0e27, fogColor: 0x0a0e27 },
+                { id: 'sunset', name: 'Sunset Orange', price: 250, color: 0x1a0a05, fogColor: 0x1a0a05 },
+                { id: 'forest', name: 'Forest Green', price: 300, color: 0x0a1a0a, fogColor: 0x0a1a0a },
+                { id: 'premium1', name: 'Cyberpunk', price: 'PREMIUM', color: 0x2a0845, fogColor: 0x2a0845 },
+                { id: 'premium2', name: 'Arctic', price: 'PREMIUM', color: 0x1a2a3a, fogColor: 0x1a2a3a }
+            ]
+        };
+
+        // Load player data from localStorage
+        function loadPlayerData() {
+            const saved = localStorage.getItem('akiAimTrainerData');
+            if (saved) {
+                playerData = { ...playerData, ...JSON.parse(saved) };
+            }
+        }
+
+        // Save player data
+        function savePlayerData() {
+            localStorage.setItem('akiAimTrainerData', JSON.stringify(playerData));
+        }
+
+        // Award coins after game
+        function awardCoins(score, accuracy) {
+            let coins = Math.floor(score / 10); // 1 coin per 10 points
+            
+            // Bonus for high accuracy
+            if (accuracy >= 80) coins += 10;
+            if (accuracy >= 90) coins += 20;
+            
+            // Bonus for streaks
+            coins += Math.floor(gameState.bestStreak / 5) * 5;
+            
+            playerData.coins += coins;
+            playerData.totalGamesPlayed++;
+            playerData.lifetimeScore += score;
+            savePlayerData();
+            
+            return coins;
+        }
 
         // Create simple sound effects using Web Audio API
         function createSound(frequency, duration, type = 'sine') {
@@ -855,11 +1004,6 @@
             aimAssistActive: false
         };
 
-        // Mouse control variables
-        let isRightMouseDown = false;
-        let previousMouseX = 0;
-        let previousMouseY = 0;
-
         // Controller detection
         window.addEventListener("gamepadconnected", (e) => {
             gameState.controllerIndex = e.gamepad.index;
@@ -936,34 +1080,26 @@
         }
 
         function onMouseDown(event) {
-            if (event.button === 2) { // Right click
-                isRightMouseDown = true;
-                previousMouseX = event.clientX;
-                previousMouseY = event.clientY;
-            }
-        }
-
-        function onMouseUp(event) {
-            if (event.button === 2) { // Right click
-                isRightMouseDown = false;
-            } else if (event.button === 0) { // Left click
+            if (event.button === 0) { // Left click to shoot
                 shootAtCenter();
             }
         }
 
+        function onMouseUp(event) {
+            // Not needed for current controls
+        }
+
         function onMouseMove(event) {
-            if (isRightMouseDown) {
-                const deltaX = event.clientX - previousMouseX;
-                const deltaY = event.clientY - previousMouseY;
+            if (!gameState.usingController) {
+                // Always update camera rotation based on mouse movement
+                const deltaX = event.movementX || 0;
+                const deltaY = event.movementY || 0;
                 
                 camera.rotation.y -= deltaX * gameState.sensitivity * 0.002;
                 camera.rotation.x -= deltaY * gameState.sensitivity * 0.002;
                 
                 // Clamp vertical rotation
                 camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
-                
-                previousMouseX = event.clientX;
-                previousMouseY = event.clientY;
             }
         }
 
@@ -1115,7 +1251,16 @@
             if (gameState.usingController) {
                 hint.innerHTML = '🎮 <strong>RIGHT STICK</strong> to aim | <strong>RT</strong> to shoot';
             } else {
-                hint.innerHTML = '🖱️ <strong>RIGHT-CLICK + DRAG</strong> to look around | <strong>LEFT-CLICK</strong> to shoot';
+                hint.innerHTML = '🖱️ <strong>MOVE MOUSE</strong> to aim | <strong>LEFT-CLICK</strong> to shoot | Press ESC to unlock mouse';
+            }
+            
+            // Request pointer lock for mouse users (allows 360 rotation)
+            if (!gameState.usingController) {
+                setTimeout(() => {
+                    if (renderer && renderer.domElement) {
+                        renderer.domElement.requestPointerLock();
+                    }
+                }, 100);
             }
             
             // Spawn initial targets
@@ -1292,6 +1437,10 @@
             document.getElementById('final-misses').textContent = gameState.misses;
             document.getElementById('final-streak').textContent = gameState.bestStreak;
             
+            // Award coins
+            const coinsEarned = awardCoins(gameState.score, accuracy);
+            document.getElementById('coins-earned').textContent = coinsEarned;
+            
             document.getElementById('end-screen').style.display = 'block';
         }
 
@@ -1321,6 +1470,135 @@
                 document.getElementById('fullscreen-btn').textContent = '⛶ Fullscreen';
             }
         }
+
+        // Shop functions
+        function openShop() {
+            document.getElementById('profile-select').style.display = 'none';
+            document.getElementById('shop-screen').style.display = 'flex';
+            document.getElementById('shop-screen').style.justifyContent = 'center';
+            document.getElementById('shop-screen').style.alignItems = 'center';
+            document.getElementById('shop-screen').style.height = '100vh';
+            updateCoinDisplay();
+            showShopCategory('crosshairs');
+        }
+
+        function closeShop() {
+            document.getElementById('shop-screen').style.display = 'none';
+            document.getElementById('profile-select').style.display = 'flex';
+            updateCoinDisplay();
+        }
+
+        function showShopCategory(category) {
+            // Update tabs
+            document.querySelectorAll('[id^="shop-tab-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('shop-tab-' + category).classList.add('active');
+            
+            const items = shopItems[category];
+            let html = '';
+            
+            items.forEach(item => {
+                const isUnlocked = playerData['unlocked' + category.charAt(0).toUpperCase() + category.slice(1)].includes(item.id);
+                const isSelected = playerData['selected' + category.charAt(0).toUpperCase() + category.slice(1, -1)] === item.id;
+                const isPremiumOnly = item.price === 'PREMIUM';
+                const canAfford = typeof item.price === 'number' && playerData.coins >= item.price;
+                
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; margin: 10px 0; border-radius: 10px; border: 2px solid ${isSelected ? '#00f2fe' : 'rgba(255, 255, 255, 0.2)'};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 1.2em; font-weight: bold; color: ${isPremiumOnly ? '#FFD700' : '#fff'};">
+                                    ${isPremiumOnly ? '👑 ' : ''}${item.name}
+                                </div>
+                                <div style="color: #b0c4de; font-size: 0.9em; margin-top: 5px;">
+                                    ${isPremiumOnly ? 'Premium Only' : (item.price === 0 ? 'Free' : item.price + ' coins')}
+                                </div>
+                            </div>
+                            <div>
+                                ${isUnlocked ? 
+                                    (isSelected ? 
+                                        '<button disabled style="opacity: 0.5; cursor: default;">Equipped</button>' : 
+                                        '<button onclick="equipItem(\'' + category + '\', \'' + item.id + '\')">Equip</button>') :
+                                    (isPremiumOnly ? 
+                                        '<button onclick="openPremium()" style="background: linear-gradient(45deg, #FFD700, #FFA500);">Get Premium</button>' :
+                                        (item.price === 0 ? 
+                                            '<button onclick="unlockItem(\'' + category + '\', \'' + item.id + '\')">Unlock</button>' :
+                                            '<button onclick="buyItem(\'' + category + '\', \'' + item.id + '\')" ' + (canAfford ? '' : 'disabled style="opacity: 0.5;"') + '>Buy</button>'))}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('shop-content').innerHTML = html;
+            document.getElementById('shop-coins').textContent = playerData.coins;
+        }
+
+        function buyItem(category, itemId) {
+            const items = shopItems[category];
+            const item = items.find(i => i.id === itemId);
+            
+            if (playerData.coins >= item.price) {
+                playerData.coins -= item.price;
+                const unlockKey = 'unlocked' + category.charAt(0).toUpperCase() + category.slice(1);
+                playerData[unlockKey].push(itemId);
+                savePlayerData();
+                showShopCategory(category);
+                sounds.hit();
+            }
+        }
+
+        function unlockItem(category, itemId) {
+            const unlockKey = 'unlocked' + category.charAt(0).toUpperCase() + category.slice(1);
+            playerData[unlockKey].push(itemId);
+            savePlayerData();
+            showShopCategory(category);
+        }
+
+        function equipItem(category, itemId) {
+            const selectKey = 'selected' + category.charAt(0).toUpperCase() + category.slice(1, -1);
+            playerData[selectKey] = itemId;
+            savePlayerData();
+            showShopCategory(category);
+            sounds.hit();
+        }
+
+        function openPremium() {
+            document.getElementById('profile-select').style.display = 'none';
+            document.getElementById('shop-screen').style.display = 'none';
+            document.getElementById('premium-screen').style.display = 'flex';
+            document.getElementById('premium-screen').style.justifyContent = 'center';
+            document.getElementById('premium-screen').style.alignItems = 'center';
+            document.getElementById('premium-screen').style.height = '100vh';
+        }
+
+        function closePremium() {
+            document.getElementById('premium-screen').style.display = 'none';
+            document.getElementById('profile-select').style.display = 'flex';
+        }
+
+        function purchasePremium() {
+            const confirmed = confirm('You will be redirected to our Discord server to purchase Premium.\n\nPrice: $4.99 (one-time payment)\n\nJoin Discord and open a ticket to buy Premium!\n\nContinue?');
+            
+            if (confirmed) {
+                // Redirect to Discord
+                window.open('https://discord.gg/JRbRr79w', '_blank');
+                
+                alert('Instructions:\n\n1. Join the Discord server\n2. Open a ticket in the #tickets channel\n3. Request "Premium Access"\n4. Complete payment via PayPal/Stripe\n5. Get your premium code!\n\nSee you there! 👑');
+            }
+        }
+
+        function updateCoinDisplay() {
+            const display = document.getElementById('coin-display');
+            if (display) {
+                display.textContent = playerData.coins;
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadPlayerData();
+            updateCoinDisplay();
+        });
     </script>
 </body>
 </html>
